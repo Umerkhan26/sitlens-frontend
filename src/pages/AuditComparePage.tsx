@@ -151,8 +151,17 @@ export function AuditComparePage() {
                 </tr>
               </thead>
               <tbody>
-                {(['seo', 'technical', 'geo', 'aeo', 'aiVisibility', 'accessibility'] as const).map(
-                  (key) => {
+                {(
+                  [
+                    'seo',
+                    'technical',
+                    'performance',
+                    'geo',
+                    'aeo',
+                    'aiVisibility',
+                    'accessibility',
+                  ] as const
+                ).map((key) => {
                   const row = comparison.scores[key]
                   return (
                     <tr key={key} className="border-b border-white/5">
@@ -161,7 +170,9 @@ export function AuditComparePage() {
                           ? 'AI Vis'
                           : key === 'accessibility'
                             ? 'A11y'
-                            : key}
+                            : key === 'performance'
+                              ? 'Perf'
+                              : key}
                       </td>
                       <td className="px-4 py-3 tabular-nums text-white/55">
                         {row?.previous ?? '—'}
@@ -176,8 +187,7 @@ export function AuditComparePage() {
                       </td>
                     </tr>
                   )
-                  },
-                )}
+                })}
               </tbody>
             </table>
           </div>

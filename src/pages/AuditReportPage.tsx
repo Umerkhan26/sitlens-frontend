@@ -76,6 +76,7 @@ export function AuditReportPage() {
     { label: 'Overall', value: audit.overallScore },
     { label: 'SEO', value: audit.scores?.seo },
     { label: 'Technical', value: audit.scores?.technical },
+    { label: 'Perf', value: audit.scores?.performance },
     { label: 'GEO', value: audit.scores?.geo },
     { label: 'AEO', value: audit.scores?.aeo },
     { label: 'AI Vis', value: audit.scores?.aiVisibility },
@@ -110,7 +111,7 @@ export function AuditReportPage() {
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8">
         {scoreCards.map((s) => (
           <div
             key={s.label}
@@ -152,8 +153,18 @@ export function AuditReportPage() {
 
       <div className="mt-8 space-y-3">
         <div className="flex flex-wrap gap-2">
-          {(['all', 'seo', 'technical', 'geo', 'aeo', 'aiVisibility', 'accessibility'] as const).map(
-            (c) => (
+          {(
+            [
+              'all',
+              'seo',
+              'technical',
+              'performance',
+              'geo',
+              'aeo',
+              'aiVisibility',
+              'accessibility',
+            ] as const
+          ).map((c) => (
             <button
               key={c}
               type="button"
@@ -164,10 +175,17 @@ export function AuditReportPage() {
                   : 'border border-white/10 text-white/50 hover:border-white/25'
               }`}
             >
-              {c === 'all' ? 'All categories' : c === 'aiVisibility' ? 'AI Vis' : c === 'accessibility' ? 'A11y' : c}
+              {c === 'all'
+                ? 'All categories'
+                : c === 'aiVisibility'
+                  ? 'AI Vis'
+                  : c === 'accessibility'
+                    ? 'A11y'
+                    : c === 'performance'
+                      ? 'Perf'
+                      : c}
             </button>
-            ),
-          )}
+          ))}
         </div>
         <div className="flex flex-wrap gap-2">
           {(['all', 'critical', 'high', 'medium', 'low'] as const).map((s) => (

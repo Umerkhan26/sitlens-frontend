@@ -57,6 +57,7 @@ export type Website = {
     scores?: {
       seo?: number
       technical?: number
+      performance?: number
       geo?: number
       aeo?: number
       aiVisibility?: number
@@ -73,6 +74,7 @@ export type Audit = {
   scores?: {
     seo?: number
     technical?: number
+    performance?: number
     geo?: number
     aeo?: number
     aiVisibility?: number
@@ -115,7 +117,7 @@ export type Usage = {
 export type Issue = {
   id: string
   code: string
-  category: 'seo' | 'technical' | 'geo' | 'aeo' | 'aiVisibility' | 'accessibility'
+  category: 'seo' | 'technical' | 'performance' | 'geo' | 'aeo' | 'aiVisibility' | 'accessibility'
   severity: 'critical' | 'high' | 'medium' | 'low'
   title: string
   whyItMatters: string
