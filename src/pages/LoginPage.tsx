@@ -32,6 +32,11 @@ export function LoginPage() {
         )}
         <Field label="Email" type="email" value={email} onChange={setEmail} />
         <Field label="Password" type="password" value={password} onChange={setPassword} />
+        <div className="-mt-2 text-right">
+          <Link to="/forgot-password" className="text-xs font-medium text-teal-dim hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         <button
           type="submit"
           disabled={loading}
@@ -106,7 +111,7 @@ export function RegisterPage() {
   )
 }
 
-function AuthShell({
+export function AuthShell({
   title,
   subtitle,
   children,
@@ -139,7 +144,7 @@ function AuthShell({
   )
 }
 
-function Field({
+export function Field({
   label,
   type,
   value,
