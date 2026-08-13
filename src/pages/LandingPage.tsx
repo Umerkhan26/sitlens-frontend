@@ -1,7 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState, type CSSProperties, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { useAuth } from '../features/auth/AuthContext'
 import { setPendingAuditUrl, websitesStartPath, withAuditUrl } from '../lib/pendingAudit'
+import { ScoreBar } from '../components/ui/ScoreBar'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 
 const SCORES = [
   { label: 'Overall', value: 72 },
@@ -12,81 +14,206 @@ const SCORES = [
   { label: 'Technical', value: 88 },
 ]
 
+const FEATURES: { title: string; body: string; icon: ReactNode }[] = [
+  {
+    title: 'SEO, GEO & AEO in one pass',
+    body: 'Titles, meta, headings, canonicals, sitemap, schema, OG, Twitter — plus generative and answer-engine coverage.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.75" />
+        <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Production-ready AI prompts',
+    body: 'Every issue ships with a prompt tuned for Cursor, Claude Code, Codex CLI or Gemini CLI. One click, one paste.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M8 8h8M8 12h5M7 4h10a2 2 0 0 1 2 2v12l-4-2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: 'Scores that mean something',
+    body: 'Weighted, category-specific scoring — not vibes. Understand exactly where to invest next.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 20V10M10 20V4M16 20v-7M22 20H2"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: 'Complete issue reports',
+    body: 'Every issue has severity, why it matters, evidence, and a concrete fix path.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" strokeWidth="1.75" />
+        <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Sub-60 second reports',
+    body: 'Crawl, analyze, and generate prompts in one shot. No configuration, no accounts to link.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M13 2L4 14h7l-1 8 10-14h-7l0-6z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: 'Yours only',
+    body: 'Reports are private to your account. Nothing is shared or resold.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+]
+
+const STEPS = [
+  ['01', 'Paste a URL', 'Point SiteLens at any public page.'],
+  ['02', 'We crawl & analyze', 'SEO, GEO, AEO, technical, accessibility, AI visibility.'],
+  ['03', 'We generate prompts', 'One production-ready prompt per issue for your AI agent.'],
+  ['04', 'Paste. Fix. Ship.', 'Copy into Cursor, Claude Code, Codex or Gemini CLI.'],
+]
+
+const FAQ = [
+  [
+    'Which AI coding agents do the prompts work with?',
+    'Cursor, Claude Code, Codex CLI, Gemini CLI, Windsurf, and any tool that accepts a natural-language coding prompt.',
+  ],
+  ['Is my data private?', 'Audits are scoped to your account. Nothing is shared or resold.'],
+  [
+    'How many audits can I run?',
+    'During the free beta, every account gets 5 audits every 7 days. Credits reset each week.',
+  ],
+  [
+    'Does it modify my site?',
+    'No. SiteLens is read-only — you decide when and how to apply each prompt.',
+  ],
+]
+
+const SAMPLE_PROMPT = `You are working on the marketing site at example.com. Add a unique meta
+description of 140–160 characters to <head> of the home page that includes
+the primary keyword. Preserve all existing meta tags and layout...`
+
+function LogoMark({ className = '' }: { className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-2 ${className}`}>
+      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent)]">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.75" />
+          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.25" opacity="0.55" />
+        </svg>
+      </span>
+      <span className="font-semibold tracking-tight text-[var(--fg)]">SiteLens</span>
+    </span>
+  )
+}
+
 export function LandingPage() {
   const { token } = useAuth()
   const navigate = useNavigate()
   const [url, setUrl] = useState('')
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  function goAudit(target?: string) {
+    const trimmed = (target ?? url).trim()
+    if (trimmed) setPendingAuditUrl(trimmed)
+    if (token) {
+      navigate(trimmed ? websitesStartPath(trimmed) : '/app/websites')
+      return
+    }
+    navigate(withAuditUrl('/register', trimmed || null))
+  }
 
   function onAudit(e: FormEvent) {
     e.preventDefault()
-    const trimmed = url.trim()
-    if (!trimmed) return
-    setPendingAuditUrl(trimmed)
-    if (token) {
-      navigate(websitesStartPath(trimmed))
-      return
-    }
-    navigate(withAuditUrl('/register', trimmed))
+    goAudit()
+  }
+
+  async function copySample() {
+    await navigator.clipboard.writeText(SAMPLE_PROMPT)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1400)
   }
 
   return (
-    <div className="min-h-screen bg-mist text-ink">
-      <nav className="absolute inset-x-0 top-0 z-20">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-          <a href="#top" className="font-display text-2xl text-white">
-            SiteLens
+    <div className="page-bg min-h-screen text-[var(--fg)]">
+      {/* Nav — PromptAudit structure */}
+      <header className="sticky top-0 z-40 px-4 pt-4">
+        <div className="nav-bar mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-2.5 sm:px-5">
+          <a href="#top" className="shrink-0">
+            <LogoMark />
           </a>
-          <div className="flex items-center gap-6 text-sm text-white/80">
-            <a href="#features" className="hidden hover:text-white sm:inline">
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 text-sm text-[var(--fg-muted)] md:flex">
+            <a href="#features" className="hover:text-[var(--fg)]">
               Features
             </a>
-            <a href="#how" className="hidden hover:text-white sm:inline">
+            <a href="#how" className="hover:text-[var(--fg)]">
               How it works
             </a>
-            <a href="#faq" className="hidden hover:text-white sm:inline">
+            <a href="#faq" className="hover:text-[var(--fg)]">
               FAQ
             </a>
-            <Link to="/login" className="hover:text-white">
+          </nav>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
+            <Link to="/login" className="hidden text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] sm:inline">
               Sign in
             </Link>
-            <Link
-              to="/register"
-              className="rounded-md bg-teal-bright px-3.5 py-2 font-medium text-ink hover:bg-teal"
-            >
-              Start free
+            <Link to="/register" className="btn-primary !py-2 !px-3.5 text-xs sm:text-sm">
+              Start free <span aria-hidden>→</span>
             </Link>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero — brand first, one composition, full-bleed atmosphere */}
-      <section id="top" className="grid-atmosphere relative min-h-[100svh] overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 opacity-40">
-          <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full border border-teal-bright/25" />
-          <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full border border-teal-bright/10" />
-          <div
-            className="absolute left-1/2 top-[28%] h-px w-[70%] -translate-x-1/2 bg-teal-bright/30"
-            style={{ animation: 'pulse-line 3s ease-in-out infinite' }}
-          />
-        </div>
-
-        <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-5 pb-16 pt-28">
-          <p className="animate-fade-up font-display text-5xl tracking-tight text-teal-bright sm:text-6xl md:text-7xl">
-            SiteLens
+      {/* Hero */}
+      <section id="top" className="relative px-5 pb-6 pt-16 sm:pt-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs text-[var(--fg-muted)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--ok)] shadow-[0_0_8px_var(--ok)]" />
+            Free during beta · 5 audits/week
           </p>
-          <h1 className="animate-fade-up-delay mt-6 max-w-2xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
+          <h1 className="animate-fade-up-delay mt-7 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
             Audit any website.
             <br />
-            Fix it with AI prompts.
+            Fix it with <span className="gradient-text">AI prompts.</span>
           </h1>
-          <p className="animate-fade-up-delay-2 mt-4 max-w-xl text-base text-white/70 sm:text-lg">
-            Instant scores for SEO, GEO, AEO, AI visibility and technical health —
-            plus a production-ready prompt for every issue.
+          <p className="animate-fade-up-delay-2 mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[var(--fg-muted)] sm:text-lg">
+            Instant scores for SEO, GEO, AEO, AI visibility and technical health — plus a
+            production-ready prompt for every issue, ready to paste into Claude Code, Cursor, Codex
+            CLI, Gemini CLI or Windsurf.
           </p>
 
           <form
             onSubmit={onAudit}
-            className="animate-fade-up-delay-2 mt-10 flex w-full max-w-xl flex-col gap-3 sm:flex-row"
+            className="animate-fade-up-delay-2 mx-auto mt-9 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-center"
           >
             <label className="sr-only" htmlFor="audit-url">
               Website URL
@@ -94,207 +221,222 @@ export function LandingPage() {
             <input
               id="audit-url"
               type="url"
-              required
               placeholder="https://your-site.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="min-w-0 flex-1 rounded-md border border-white/15 bg-white/5 px-4 py-3 font-mono text-sm text-white placeholder:text-white/35 outline-none focus:border-teal-bright"
+              className="min-w-0 flex-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-5 py-3 font-mono text-sm text-[var(--fg)] outline-none placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)]"
             />
-            <button
-              type="submit"
-              className="rounded-md bg-teal-bright px-5 py-3 text-sm font-semibold text-ink hover:bg-teal"
-            >
-              Audit your site
+            <button type="submit" className="btn-primary whitespace-nowrap">
+              Audit your site <span aria-hidden>→</span>
             </button>
           </form>
-          <p className="mt-3 text-xs text-white/45">Free during beta · 5 audits / week</p>
+          <div className="animate-fade-up-delay-3 mt-4">
+            <a href="#how" className="btn-ghost !py-2.5 text-sm">
+              See how it works
+            </a>
+          </div>
         </div>
-      </section>
 
-      {/* Score mock — below fold */}
-      <section className="border-b border-ink/5 bg-white px-5 py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="font-mono text-xs text-muted">audit://example.com</p>
-              <h2 className="mt-1 text-2xl font-semibold">Complete · 24s</h2>
-            </div>
-            <span className="rounded-md bg-ok/10 px-2.5 py-1 text-xs font-medium text-ok">
-              Sample report
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {SCORES.map((s, i) => (
-              <ScoreRing key={s.label} label={s.label} value={s.value} delay={i * 0.08} />
-            ))}
-          </div>
-          <div className="mt-8 rounded-lg border border-ink/8 bg-mist p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <span className="rounded bg-critical/10 px-2 py-0.5 text-xs font-medium text-critical">
-                  Critical
-                </span>
-                <p className="mt-2 font-medium">Missing meta description</p>
+        {/* Product frame — matches PromptAudit sample report */}
+        <div className="animate-fade-up-delay-3 animate-float relative z-10 mx-auto mt-14 max-w-4xl sm:mt-16">
+          <div className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-[var(--accent)]/10 blur-3xl" />
+          <div className="product-frame relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+                </div>
+                <p className="font-mono text-xs text-[var(--fg-subtle)]">audit://example.com</p>
               </div>
-              <button
-                type="button"
-                className="rounded-md border border-ink/10 bg-white px-3 py-1.5 text-xs font-medium hover:border-teal"
-              >
-                Copy prompt
-              </button>
+              <p className="text-xs text-[var(--fg-muted)]">Complete · 24s</p>
             </div>
-            <pre className="mt-4 overflow-x-auto rounded-md bg-ink p-4 font-mono text-xs leading-relaxed text-teal-bright/90">
-{`You are working on the marketing site at example.com. Add a unique meta
-description of 140–160 characters to <head> of the home page that includes
-the primary keyword. Preserve all existing meta tags and layout...`}
-            </pre>
+
+            <div className="p-4 sm:p-5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+                {SCORES.map((s) => (
+                  <ScoreBar key={s.label} label={s.label} value={s.value} />
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <span className="rounded-md bg-[var(--danger)]/15 px-2 py-0.5 text-[11px] font-medium text-[var(--danger)]">
+                      Critical
+                    </span>
+                    <p className="mt-2 text-base font-semibold tracking-tight">
+                      Missing meta description
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void copySample()}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)] hover:border-[var(--accent)] hover:text-[var(--fg)]"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <rect
+                        x="8"
+                        y="8"
+                        width="12"
+                        height="12"
+                        rx="2"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                      />
+                      <path
+                        d="M4 16V6a2 2 0 0 1 2-2h10"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    {copied ? 'Copied' : 'Copy prompt'}
+                  </button>
+                </div>
+                <pre className="mt-4 overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--bg)] p-4 font-mono text-[11px] leading-relaxed text-[var(--accent)] sm:text-xs">
+                  {SAMPLE_PROMPT}
+                </pre>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="features" className="px-5 py-20">
+      {/* Features */}
+      <section id="features" className="px-5 py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="font-display text-3xl text-ink sm:text-4xl">Ship AI-native web quality</h2>
-          <p className="mt-3 max-w-2xl text-muted">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
+            Features
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Ship AI-native web quality
+          </h2>
+          <p className="mt-3 max-w-2xl text-[var(--fg-muted)]">
             Everything you need to rank in Google, appear in AI answers, and pass the technical bar.
           </p>
-          <div className="mt-12 grid gap-10 md:grid-cols-3">
-            {[
-              {
-                title: 'SEO, GEO & AEO in one pass',
-                body: 'Titles, meta, headings, canonicals, sitemap, schema, OG — plus generative and answer-engine coverage.',
-              },
-              {
-                title: 'Production-ready AI prompts',
-                body: 'Every issue ships with a prompt tuned for Cursor, Claude Code, Codex CLI or Gemini CLI. One click, one paste.',
-              },
-              {
-                title: 'Scores that mean something',
-                body: 'Weighted, category-specific scoring — not vibes. Understand exactly where to invest next.',
-              },
-            ].map((f) => (
-              <div key={f.title}>
-                <h3 className="text-lg font-semibold">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{f.body}</p>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="feature-card p-6">
+                <span className="icon-box">{f.icon}</span>
+                <h3 className="mt-4 text-lg font-semibold tracking-tight">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--fg-muted)]">{f.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how" className="border-y border-ink/5 bg-white px-5 py-20">
+      {/* How it works */}
+      <section id="how" className="border-y border-[var(--border)] bg-[var(--bg-elevated)] px-5 py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="font-display text-3xl text-ink sm:text-4xl">From URL to fixed website</h2>
-          <p className="mt-3 text-muted">No configuration. Paste a URL and start shipping fixes.</p>
-          <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ['01', 'Paste a URL', 'Point SiteLens at any public page.'],
-              ['02', 'We crawl & analyze', 'SEO, GEO, AEO, technical, accessibility, AI visibility.'],
-              ['03', 'We generate prompts', 'One production-ready prompt per issue for your AI agent.'],
-              ['04', 'Paste. Fix. Ship.', 'Copy into Cursor, Claude Code, Codex or Gemini CLI.'],
-            ].map(([n, t, d]) => (
-              <li key={n}>
-                <span className="font-mono text-sm text-teal">{n}</span>
-                <h3 className="mt-2 font-semibold">{t}</h3>
-                <p className="mt-1 text-sm text-muted">{d}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
+            How it works
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            From URL to fixed website in minutes
+          </h2>
+          <p className="mt-3 text-[var(--fg-muted)]">
+            No configuration. No integrations. Just paste a URL and start shipping fixes.
+          </p>
+          <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map(([n, t, d]) => (
+              <li key={n} className="feature-card p-6">
+                <span className="font-mono text-sm font-medium text-[var(--accent)]">{n}</span>
+                <h3 className="mt-3 font-semibold tracking-tight">{t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--fg-muted)]">{d}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      <section id="faq" className="px-5 py-20">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="font-display text-3xl text-ink">Answers first</h2>
-          <dl className="mt-10 space-y-8">
-            {[
-              [
-                'Which AI coding agents do the prompts work with?',
-                'Cursor, Claude Code, Codex CLI, Gemini CLI, Windsurf, and any tool that accepts a natural-language coding prompt.',
-              ],
-              [
-                'Is my data private?',
-                'Audits are scoped to your account. Nothing is shared or resold.',
-              ],
-              [
-                'How many audits can I run?',
-                'During the free beta, every account gets 5 audits every 7 days. Credits reset each week.',
-              ],
-              [
-                'Does it modify my site?',
-                'No. SiteLens is read-only — you decide when and how to apply each prompt.',
-              ],
-            ].map(([q, a]) => (
-              <div key={q}>
-                <dt className="font-semibold">{q}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-muted">{a}</dd>
-              </div>
-            ))}
-          </dl>
+      {/* Demo / in action */}
+      <section className="px-5 py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-medium text-[var(--accent)]">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M8 5v14l11-7L8 5z" />
+            </svg>
+            Live product
+          </span>
+          <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+            See SiteLens in action
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-[var(--fg-muted)]">
+            Watch how a single URL turns into a complete SEO, GEO, and AEO report with copy-paste AI
+            fix prompts.
+          </p>
+        </div>
+        <div className="mx-auto mt-10 max-w-4xl">
+          <div className="cta-band overflow-hidden p-8 text-center sm:p-12">
+            <h3 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              See a full audit report
+            </h3>
+            <p className="mx-auto mt-3 max-w-lg text-sm text-[var(--fg-muted)] sm:text-base">
+              Sign up free and run your first audit. Every issue includes a copy-paste prompt for
+              your AI coding agent.
+            </p>
+            <button type="button" onClick={() => goAudit()} className="btn-primary mt-8">
+              Run a free audit <span aria-hidden>→</span>
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="bg-ink px-5 py-20 text-center text-white">
-        <h2 className="font-display text-3xl sm:text-4xl">Free during beta. No credit card.</h2>
-        <p className="mx-auto mt-3 max-w-lg text-white/65">
-          Get 5 full audits every week — with AI prompts for every issue.
-        </p>
-        <Link
-          to="/register"
-          className="mt-8 inline-block rounded-md bg-teal-bright px-6 py-3 text-sm font-semibold text-ink hover:bg-teal"
-        >
-          Start free
-        </Link>
+      {/* FAQ */}
+      <section id="faq" className="px-5 pb-24">
+        <div className="mx-auto max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
+            FAQ
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Answers first</h2>
+          <div className="mt-10 divide-y divide-[var(--border)] border-y border-[var(--border)]">
+            {FAQ.map(([q, a], i) => {
+              const open = openFaq === i
+              return (
+                <div key={q}>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-4 py-5 text-left"
+                    onClick={() => setOpenFaq(open ? null : i)}
+                    aria-expanded={open}
+                  >
+                    <span className="font-medium tracking-tight">{q}</span>
+                    <span className="text-lg text-[var(--fg-muted)]">{open ? '−' : '+'}</span>
+                  </button>
+                  {open && (
+                    <p className="pb-5 text-sm leading-relaxed text-[var(--fg-muted)]">{a}</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </section>
 
-      <footer className="border-t border-ink/5 bg-mist px-5 py-8">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-sm text-muted">
-          <span className="font-display text-lg text-ink">SiteLens</span>
+      {/* Final CTA */}
+      <section className="px-5 pb-20">
+        <div className="cta-band mx-auto max-w-5xl px-6 py-16 text-center sm:px-10">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            Free during beta. No credit card.
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-[var(--fg-muted)]">
+            Get 5 full audits every week — with AI prompts for every issue.
+          </p>
+          <Link to="/register" className="btn-primary mt-8 inline-flex">
+            Start free <span aria-hidden>✓</span>
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t border-[var(--border)] px-5 py-8">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-sm text-[var(--fg-muted)]">
+          <LogoMark />
           <span>© 2026 SiteLens. Built for indie hackers, founders, and agencies.</span>
         </div>
       </footer>
-    </div>
-  )
-}
-
-function ScoreRing({
-  label,
-  value,
-  delay,
-}: {
-  label: string
-  value: number
-  delay: number
-}) {
-  const r = 28
-  const c = 2 * Math.PI * r
-  const offset = c - (value / 100) * c
-
-  return (
-    <div className="flex flex-col items-center gap-2 rounded-lg border border-ink/8 bg-mist/60 px-3 py-4">
-      <svg width="72" height="72" viewBox="0 0 72 72" className="-rotate-90">
-        <circle cx="36" cy="36" r={r} fill="none" stroke="#e8eef4" strokeWidth="6" />
-        <circle
-          cx="36"
-          cy="36"
-          r={r}
-          fill="none"
-          stroke="#14b8a6"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          className="score-ring"
-          style={
-            {
-              strokeDashoffset: offset,
-              '--score-offset': offset,
-              animationDelay: `${delay}s`,
-            } as CSSProperties
-          }
-        />
-      </svg>
-      <p className="text-xl font-semibold tabular-nums">{value}</p>
-      <p className="text-center text-xs text-muted">{label}</p>
     </div>
   )
 }

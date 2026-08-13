@@ -132,27 +132,33 @@ export function WebsitesPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Websites</h1>
-          <p className="mt-1 text-sm text-white/55">
-            Add a new site once. To scan again, click <span className="text-white/80">Run audit</span>.
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+            Library
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Websites</h1>
+          <p className="mt-2 text-sm text-[var(--fg-muted)]">
+            Add a site once. To scan again, click{' '}
+            <span className="text-[var(--fg)]">Run audit</span>.
           </p>
         </div>
         {usage && (
-          <p className="text-sm text-white/50">
-            Credits:{' '}
-            <span className="font-semibold text-teal-bright">
-              {usage.remaining}/{usage.limit}
-            </span>{' '}
-            this week
+          <p className="rounded-full border border-[var(--accent)]/30 bg-[var(--accent-soft)] px-3 py-1.5 font-mono text-xs text-[var(--accent)]">
+            {usage.remaining}/{usage.limit} credits
           </p>
         )}
       </div>
 
       {handoffBusy && (
-        <p className="mt-6 text-sm text-teal-bright">Starting audit from your landing URL…</p>
+        <div className="feature-card mt-6 flex items-center gap-3 px-4 py-3.5">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--accent)]" />
+          <p className="text-sm text-[var(--accent)]">Starting audit from your landing URL…</p>
+        </div>
       )}
 
-      <form onSubmit={onAdd} className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <form
+        onSubmit={onAdd}
+        className="feature-card mt-8 flex flex-col gap-3 p-2.5 sm:flex-row sm:items-center"
+      >
         <input
           type="url"
           required
@@ -163,26 +169,26 @@ export function WebsitesPage() {
             setExistingWebsiteId(null)
             setError('')
           }}
-          className="min-w-0 flex-1 rounded-md border border-white/15 bg-ink-soft px-4 py-3 font-mono text-sm outline-none focus:border-teal-bright"
+          className="min-w-0 flex-1 rounded-xl border-0 bg-transparent px-4 py-3 font-mono text-sm text-[var(--fg)] outline-none placeholder:text-[var(--fg-subtle)]"
         />
         <button
           type="submit"
           disabled={saving || handoffBusy}
-          className="rounded-md bg-teal-bright px-5 py-3 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
+          className="btn-primary !rounded-xl disabled:opacity-60"
         >
           {saving ? 'Adding…' : 'Add website'}
         </button>
       </form>
 
       {error && (
-        <div className="mt-4 rounded-md bg-critical/15 px-3 py-3 text-sm text-red-300">
+        <div className="mt-4 rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
           <p>{error}</p>
           {existingWebsiteId && (
             <button
               type="button"
               disabled={runningId === existingWebsiteId || (usage != null && usage.remaining <= 0)}
               onClick={() => void onRunAudit(existingWebsiteId)}
-              className="mt-3 rounded-md bg-teal-bright px-3.5 py-2 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
+              className="btn-primary mt-3 !rounded-xl disabled:opacity-60"
             >
               {runningId === existingWebsiteId ? 'Starting…' : 'Run audit instead'}
             </button>
@@ -191,26 +197,29 @@ export function WebsitesPage() {
       )}
 
       <div className="mt-10 space-y-3">
-        {loading && <p className="text-sm text-white/50">Loading…</p>}
+        {loading && <p className="text-sm text-[var(--fg-muted)]">Loading…</p>}
         {!loading && websites.length === 0 && (
-          <div className="rounded-lg border border-dashed border-white/15 px-6 py-12 text-center text-sm text-white/50">
-            No websites yet. Add your first URL above.
+          <div className="feature-card border-dashed px-6 py-14 text-center">
+            <p className="text-xl font-semibold">No websites yet</p>
+            <p className="mt-2 text-sm text-[var(--fg-muted)]">Add your first URL above to begin.</p>
           </div>
         )}
         {websites.map((site) => (
           <div
             key={site.id}
-            className="flex flex-col gap-4 rounded-lg border border-white/10 bg-ink-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+            className="feature-card flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <p className="font-medium">{site.name || site.hostname}</p>
-              <p className="mt-0.5 font-mono text-xs text-white/45">{site.url}</p>
+              <p className="font-medium tracking-tight">{site.name || site.hostname}</p>
+              <p className="mt-0.5 font-mono text-xs text-[var(--fg-subtle)]">{site.url}</p>
               {site.latestAudit?.overallScore != null && (
-                <p className="mt-2 text-sm text-teal-bright">
-                  Latest score: {site.latestAudit.overallScore}
+                <p className="mt-2 text-sm">
+                  <span className="text-lg font-semibold text-[var(--accent)]">
+                    {site.latestAudit.overallScore}
+                  </span>
                   <Link
                     to={`/app/audits/${site.latestAudit.id}/report`}
-                    className="ml-2 text-white/50 underline-offset-2 hover:underline"
+                    className="ml-2 text-[var(--fg-subtle)] underline-offset-2 hover:text-[var(--accent)] hover:underline"
                   >
                     View report
                   </Link>
@@ -222,7 +231,7 @@ export function WebsitesPage() {
                 type="button"
                 disabled={runningId === site.id || (usage != null && usage.remaining <= 0)}
                 onClick={() => void onRunAudit(site.id)}
-                className="rounded-md bg-teal-bright px-3.5 py-2 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
+                className="btn-primary !rounded-xl !py-2 disabled:opacity-60"
               >
                 {runningId === site.id
                   ? 'Starting…'
@@ -232,14 +241,14 @@ export function WebsitesPage() {
               </button>
               <Link
                 to={`/app/websites/${site.id}`}
-                className="rounded-md border border-white/15 px-3.5 py-2 text-sm text-white/80 hover:border-teal-bright/40"
+                className="btn-ghost !rounded-xl !py-2"
               >
                 History
               </Link>
               <button
                 type="button"
                 onClick={() => void onDelete(site.id)}
-                className="rounded-md border border-white/10 px-3.5 py-2 text-sm text-white/45 hover:border-red-400/40 hover:text-red-300"
+                className="rounded-xl border border-[var(--border)] px-3.5 py-2 text-sm text-[var(--fg-subtle)] hover:border-[var(--danger)]/40 hover:text-[var(--danger)]"
               >
                 Remove
               </button>

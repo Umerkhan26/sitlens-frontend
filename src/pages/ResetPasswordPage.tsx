@@ -43,7 +43,9 @@ export function ResetPasswordPage() {
     <AuthShell title="Reset password" subtitle="Choose a new password for your SiteLens account.">
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
-          <p className="rounded-md bg-critical/10 px-3 py-2 text-sm text-critical">{error}</p>
+          <p className="rounded-xl bg-[var(--danger)]/10 px-3 py-2.5 text-sm text-[var(--danger)]">
+            {error}
+          </p>
         )}
         <Field
           label="New password"
@@ -59,15 +61,11 @@ export function ResetPasswordPage() {
           onChange={setConfirm}
           minLength={8}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-teal-bright py-2.5 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
-        >
+        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-xl disabled:opacity-60">
           {loading ? 'Updating…' : 'Update password'}
         </button>
-        <p className="text-center text-sm text-muted">
-          <Link to="/login" className="font-medium text-teal-dim hover:underline">
+        <p className="text-center text-sm text-[var(--fg-muted)]">
+          <Link to="/login" className="font-semibold text-[var(--accent)] hover:underline">
             Back to sign in
           </Link>
         </p>

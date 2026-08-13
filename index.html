@@ -1,9 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('sitelens_theme');
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+          else if (window.matchMedia('(prefers-color-scheme: light)').matches)
+            document.documentElement.setAttribute('data-theme', 'light');
+        } catch (e) {}
+      })();
+    </script>
     <meta
       name="description"
       content="SiteLens — audit any website for SEO, GEO, AEO and technical health, then fix issues with AI coding prompts."

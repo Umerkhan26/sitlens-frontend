@@ -7,6 +7,7 @@ import {
   websitesStartPath,
   withAuditUrl,
 } from '../lib/pendingAudit'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 
 function useAuditHandoffUrl() {
   const [params] = useSearchParams()
@@ -53,39 +54,37 @@ export function LoginPage() {
 
   return (
     <AuthShell
-      title="Sign in"
+      title="Welcome back"
       subtitle={
         auditUrl
-          ? `After sign in we’ll start auditing ${auditUrl}.`
-          : 'Welcome back to SiteLens.'
+          ? `Sign in and we’ll start auditing ${auditUrl}.`
+          : 'Sign in to run audits and view your reports.'
       }
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
-          <p className="rounded-md bg-critical/10 px-3 py-2 text-sm text-critical">{error}</p>
+          <p className="rounded-xl bg-[var(--danger)]/10 px-3 py-2.5 text-sm text-[var(--danger)]">
+            {error}
+          </p>
         )}
         <Field label="Email" type="email" value={email} onChange={setEmail} />
         <Field label="Password" type="password" value={password} onChange={setPassword} />
-        <div className="-mt-2 text-right">
-          <Link to="/forgot-password" className="text-xs font-medium text-teal-dim hover:underline">
+        <div className="-mt-1 text-right">
+          <Link to="/forgot-password" className="text-xs font-medium text-[var(--accent)] hover:underline">
             Forgot password?
           </Link>
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-teal-bright py-2.5 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
-        >
+        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-xl disabled:opacity-60">
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-muted">
-        No account?{' '}
+      <p className="mt-8 text-center text-sm text-[var(--fg-muted)]">
+        New here?{' '}
         <Link
           to={withAuditUrl('/register', auditUrl || null)}
-          className="font-medium text-teal-dim hover:underline"
+          className="font-semibold text-[var(--accent)] hover:underline"
         >
-          Start free
+          Create an account
         </Link>
       </p>
     </AuthShell>
@@ -118,16 +117,18 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      title="Start free"
+      title="Create your account"
       subtitle={
         auditUrl
-          ? `Create an account and we’ll audit ${auditUrl}.`
-          : '5 audits per week during beta.'
+          ? `Free beta — then we’ll audit ${auditUrl}.`
+          : '5 audits every week during beta. No credit card.'
       }
     >
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
-          <p className="rounded-md bg-critical/10 px-3 py-2 text-sm text-critical">{error}</p>
+          <p className="rounded-xl bg-[var(--danger)]/10 px-3 py-2.5 text-sm text-[var(--danger)]">
+            {error}
+          </p>
         )}
         <Field label="Name" type="text" value={name} onChange={setName} />
         <Field label="Email" type="email" value={email} onChange={setEmail} />
@@ -138,19 +139,15 @@ export function RegisterPage() {
           onChange={setPassword}
           minLength={8}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-teal-bright py-2.5 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
-        >
-          {loading ? 'Creating account…' : auditUrl ? 'Create account & audit' : 'Create account'}
+        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-xl disabled:opacity-60">
+          {loading ? 'Creating account…' : auditUrl ? 'Create account & audit' : 'Start free'}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-muted">
+      <p className="mt-8 text-center text-sm text-[var(--fg-muted)]">
         Already have an account?{' '}
         <Link
           to={withAuditUrl('/login', auditUrl || null)}
-          className="font-medium text-teal-dim hover:underline"
+          className="font-semibold text-[var(--accent)] hover:underline"
         >
           Sign in
         </Link>
@@ -169,22 +166,29 @@ export function AuthShell({
   children: ReactNode
 }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="grid-atmosphere hidden items-center justify-center p-12 lg:flex">
-        <div>
-          <p className="font-display text-5xl text-teal-bright">SiteLens</p>
-          <p className="mt-4 max-w-sm text-white/70">
-            Audit. Explain. Copy a fix prompt into your AI coding agent.
-          </p>
-        </div>
+    <div className="page-bg relative flex min-h-screen items-center justify-center px-5 py-16">
+      <div className="absolute right-5 top-5">
+        <ThemeToggle />
       </div>
-      <div className="flex items-center justify-center bg-mist px-5 py-12">
-        <div className="w-full max-w-md">
-          <Link to="/" className="font-display text-2xl text-teal lg:hidden">
+      <div className="relative w-full max-w-md">
+        <Link
+          to="/"
+          className="mb-8 inline-flex text-sm text-[var(--fg-muted)] transition hover:text-[var(--accent)]"
+        >
+          ← Back home
+        </Link>
+        <div className="product-frame p-7 sm:p-9">
+          <p className="inline-flex items-center gap-2 font-semibold tracking-tight text-[var(--fg)]">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent)]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.75" />
+                <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.25" opacity="0.55" />
+              </svg>
+            </span>
             SiteLens
-          </Link>
-          <h1 className="mt-6 text-2xl font-semibold lg:mt-0">{title}</h1>
-          <p className="mt-1 text-sm text-muted">{subtitle}</p>
+          </p>
+          <h1 className="mt-6 text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--fg-muted)]">{subtitle}</p>
           <div className="mt-8">{children}</div>
         </div>
       </div>
@@ -207,14 +211,14 @@ export function Field({
 }) {
   return (
     <label className="block text-sm">
-      <span className="font-medium">{label}</span>
+      <span className="font-medium text-[var(--fg-muted)]">{label}</span>
       <input
         type={type}
         required
         minLength={minLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1.5 w-full rounded-md border border-ink/10 bg-white px-3 py-2.5 outline-none focus:border-teal"
+        className="mt-1.5 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg)] px-3.5 py-3 text-[var(--fg)] outline-none transition focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)]"
       />
     </label>
   )

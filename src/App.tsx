@@ -13,6 +13,7 @@ import { AuditComparePage } from './pages/AuditComparePage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AppLayout } from './layouts/AppLayout'
 import { AuthProvider, useAuth } from './features/auth/AuthContext'
+import { ThemeProvider } from './features/theme/ThemeContext'
 import type { ReactNode } from 'react'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -23,33 +24,35 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<DashboardPage />} />
-            <Route path="websites" element={<WebsitesPage />} />
-            <Route path="websites/:id" element={<WebsiteHistoryPage />} />
-            <Route path="audits/:id" element={<AuditProgressPage />} />
-            <Route path="audits/:id/report" element={<AuditReportPage />} />
-            <Route path="audits/:id/compare" element={<AuditComparePage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardPage />} />
+              <Route path="websites" element={<WebsitesPage />} />
+              <Route path="websites/:id" element={<WebsiteHistoryPage />} />
+              <Route path="audits/:id" element={<AuditProgressPage />} />
+              <Route path="audits/:id/report" element={<AuditReportPage />} />
+              <Route path="audits/:id/compare" element={<AuditComparePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

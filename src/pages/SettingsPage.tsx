@@ -56,76 +56,74 @@ export function SettingsPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-      <p className="mt-1 text-sm text-white/55">Manage your SiteLens account.</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+        Account
+      </p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight">Settings</h1>
+      <p className="mt-2 text-sm text-[var(--fg-muted)]">Manage your SiteLens account.</p>
 
       {error && (
-        <p className="mt-4 rounded-md bg-critical/15 px-3 py-2 text-sm text-red-300">{error}</p>
+        <p className="mt-4 rounded-xl bg-[var(--danger)]/10 px-3 py-2 text-sm text-[var(--danger)]">
+          {error}
+        </p>
       )}
       {message && (
-        <p className="mt-4 rounded-md bg-teal-bright/10 px-3 py-2 text-sm text-teal-bright">
+        <p className="mt-4 rounded-xl bg-[var(--accent-soft)] px-3 py-2 text-sm text-[var(--accent)]">
           {message}
         </p>
       )}
 
-      <form onSubmit={onSaveProfile} className="mt-8 space-y-4 rounded-lg border border-white/10 bg-ink-soft p-5">
-        <h2 className="font-medium">Profile</h2>
+      <form onSubmit={onSaveProfile} className="feature-card mt-8 space-y-4 p-5">
+        <h2 className="font-semibold tracking-tight">Profile</h2>
         <label className="block text-sm">
-          <span className="text-white/60">Email</span>
+          <span className="text-[var(--fg-muted)]">Email</span>
           <input
             value={user?.email || ''}
             disabled
-            className="mt-1.5 w-full rounded-md border border-white/10 bg-ink px-3 py-2.5 text-white/50"
+            className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-3 py-2.5 text-[var(--fg-subtle)]"
           />
         </label>
         <label className="block text-sm">
-          <span className="text-white/60">Name</span>
+          <span className="text-[var(--fg-muted)]">Name</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1.5 w-full rounded-md border border-white/15 bg-ink px-3 py-2.5 outline-none focus:border-teal-bright"
+            className="mt-1.5 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg)] px-3 py-2.5 text-[var(--fg)] outline-none focus:border-[var(--accent)]"
           />
         </label>
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-md bg-teal-bright px-4 py-2 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
-        >
+        <button type="submit" disabled={loading} className="btn-primary !rounded-xl disabled:opacity-60">
           Save profile
         </button>
       </form>
 
-      <form
-        onSubmit={onChangePassword}
-        className="mt-6 space-y-4 rounded-lg border border-white/10 bg-ink-soft p-5"
-      >
-        <h2 className="font-medium">Change password</h2>
+      <form onSubmit={onChangePassword} className="feature-card mt-6 space-y-4 p-5">
+        <h2 className="font-semibold tracking-tight">Change password</h2>
         <label className="block text-sm">
-          <span className="text-white/60">Current password</span>
+          <span className="text-[var(--fg-muted)]">Current password</span>
           <input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
-            className="mt-1.5 w-full rounded-md border border-white/15 bg-ink px-3 py-2.5 outline-none focus:border-teal-bright"
+            className="mt-1.5 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg)] px-3 py-2.5 text-[var(--fg)] outline-none focus:border-[var(--accent)]"
           />
         </label>
         <label className="block text-sm">
-          <span className="text-white/60">New password</span>
+          <span className="text-[var(--fg-muted)]">New password</span>
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
             minLength={8}
-            className="mt-1.5 w-full rounded-md border border-white/15 bg-ink px-3 py-2.5 outline-none focus:border-teal-bright"
+            className="mt-1.5 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg)] px-3 py-2.5 text-[var(--fg)] outline-none focus:border-[var(--accent)]"
           />
         </label>
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md border border-white/15 px-4 py-2 text-sm hover:border-teal-bright/40 disabled:opacity-60"
+          className="btn-ghost !rounded-xl disabled:opacity-60"
         >
           Update password
         </button>
