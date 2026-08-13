@@ -23,6 +23,9 @@ export function AppLayout() {
               <NavLink to="/app/websites" className={navClass}>
                 Websites
               </NavLink>
+              <NavLink to="/app/settings" className={navClass}>
+                Settings
+              </NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-4 text-sm text-white/70">

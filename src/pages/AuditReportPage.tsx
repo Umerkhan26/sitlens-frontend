@@ -18,6 +18,7 @@ export function AuditReportPage() {
   const [categoryFilter, setCategoryFilter] = useState<'all' | Issue['category']>('all')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [copiedAll, setCopiedAll] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -51,6 +52,19 @@ export function AuditReportPage() {
     await navigator.clipboard.writeText(issue.fixPrompt)
     setCopied(issue.id)
     setTimeout(() => setCopied(null), 1500)
+  }
+
+  async function copyAllPrompts() {
+    const blocks = filtered
+      .filter((i) => i.fixPrompt)
+      .map(
+        (i, idx) =>
+          `## ${idx + 1}. [${i.severity.toUpperCase()} / ${i.category}] ${i.title}\n\n${i.fixPrompt}`,
+      )
+    if (blocks.length === 0) return
+    await navigator.clipboard.writeText(blocks.join('\n\n---\n\n'))
+    setCopiedAll(true)
+    setTimeout(() => setCopiedAll(false), 1500)
   }
 
   if (error) {
@@ -100,14 +114,23 @@ export function AuditReportPage() {
           <p className="text-xs text-white/40">
             {new Date(audit.createdAt).toLocaleString()}
           </p>
-          {audit.website?.id && (
-            <Link
-              to={`/app/audits/${audit.id}/compare`}
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => void copyAllPrompts()}
               className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-white/70 hover:border-teal-bright/40"
             >
-              Compare with previous
-            </Link>
-          )}
+              {copiedAll ? 'Copied all' : 'Copy all prompts'}
+            </button>
+            {audit.website?.id && (
+              <Link
+                to={`/app/audits/${audit.id}/compare`}
+                className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-white/70 hover:border-teal-bright/40"
+              >
+                Compare with previous
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
