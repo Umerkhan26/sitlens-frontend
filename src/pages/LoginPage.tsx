@@ -1,10 +1,37 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
+import {
+  getPendingAuditUrl,
+  setPendingAuditUrl,
+  websitesStartPath,
+  withAuditUrl,
+} from '../lib/pendingAudit'
+
+function useAuditHandoffUrl() {
+  const [params] = useSearchParams()
+  const fromQuery = params.get('url')?.trim() || ''
+  const [auditUrl, setAuditUrl] = useState(() => fromQuery || getPendingAuditUrl() || '')
+
+  useEffect(() => {
+    if (fromQuery) {
+      setPendingAuditUrl(fromQuery)
+      setAuditUrl(fromQuery)
+    }
+  }, [fromQuery])
+
+  return auditUrl
+}
+
+function afterAuthPath(auditUrl: string) {
+  if (auditUrl) return websitesStartPath(auditUrl)
+  return '/app'
+}
 
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const auditUrl = useAuditHandoffUrl()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -16,7 +43,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       await login(email, password)
-      navigate('/app')
+      navigate(afterAuthPath(auditUrl))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
@@ -25,7 +52,14 @@ export function LoginPage() {
   }
 
   return (
-    <AuthShell title="Sign in" subtitle="Welcome back to SiteLens.">
+    <AuthShell
+      title="Sign in"
+      subtitle={
+        auditUrl
+          ? `After sign in we’ll start auditing ${auditUrl}.`
+          : 'Welcome back to SiteLens.'
+      }
+    >
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
           <p className="rounded-md bg-critical/10 px-3 py-2 text-sm text-critical">{error}</p>
@@ -47,7 +81,10 @@ export function LoginPage() {
       </form>
       <p className="mt-6 text-center text-sm text-muted">
         No account?{' '}
-        <Link to="/register" className="font-medium text-teal-dim hover:underline">
+        <Link
+          to={withAuditUrl('/register', auditUrl || null)}
+          className="font-medium text-teal-dim hover:underline"
+        >
           Start free
         </Link>
       </p>
@@ -58,6 +95,7 @@ export function LoginPage() {
 export function RegisterPage() {
   const { register } = useAuth()
   const navigate = useNavigate()
+  const auditUrl = useAuditHandoffUrl()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -70,7 +108,7 @@ export function RegisterPage() {
     setLoading(true)
     try {
       await register(name, email, password)
-      navigate('/app')
+      navigate(afterAuthPath(auditUrl))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -79,7 +117,14 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthShell title="Start free" subtitle="5 audits per week during beta.">
+    <AuthShell
+      title="Start free"
+      subtitle={
+        auditUrl
+          ? `Create an account and we’ll audit ${auditUrl}.`
+          : '5 audits per week during beta.'
+      }
+    >
       <form onSubmit={onSubmit} className="space-y-4">
         {error && (
           <p className="rounded-md bg-critical/10 px-3 py-2 text-sm text-critical">{error}</p>
@@ -98,12 +143,15 @@ export function RegisterPage() {
           disabled={loading}
           className="w-full rounded-md bg-teal-bright py-2.5 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
         >
-          {loading ? 'Creating account…' : 'Create account'}
+          {loading ? 'Creating account…' : auditUrl ? 'Create account & audit' : 'Create account'}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-teal-dim hover:underline">
+        <Link
+          to={withAuditUrl('/login', auditUrl || null)}
+          className="font-medium text-teal-dim hover:underline"
+        >
           Sign in
         </Link>
       </p>

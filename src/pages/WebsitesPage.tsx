@@ -1,10 +1,16 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ApiError, useApi, type Usage, type Website } from '../services/api'
+import {
+  clearPendingAuditUrl,
+  getPendingAuditUrl,
+  setPendingAuditUrl,
+} from '../lib/pendingAudit'
 
 export function WebsitesPage() {
   const { api } = useApi()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [websites, setWebsites] = useState<Website[]>([])
   const [usage, setUsage] = useState<Usage | null>(null)
   const [url, setUrl] = useState('')
@@ -13,6 +19,8 @@ export function WebsitesPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [runningId, setRunningId] = useState<string | null>(null)
+  const [handoffBusy, setHandoffBusy] = useState(false)
+  const handoffStarted = useRef(false)
 
   async function load() {
     setLoading(true)
@@ -34,6 +42,41 @@ export function WebsitesPage() {
     void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    const fromQuery = searchParams.get('startAudit')?.trim() || ''
+    const pending = fromQuery || getPendingAuditUrl() || ''
+    if (!pending || handoffStarted.current) return
+    handoffStarted.current = true
+    setUrl(pending)
+    setPendingAuditUrl(pending)
+    if (fromQuery) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('startAudit')
+      setSearchParams(next, { replace: true })
+    }
+    void startAuditNow(pending)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function startAuditNow(targetUrl: string) {
+    setError('')
+    setExistingWebsiteId(null)
+    setHandoffBusy(true)
+    setRunningId('handoff')
+    try {
+      const data = await api<{ audit: { id: string } }>('/websites/audit-now', {
+        method: 'POST',
+        body: JSON.stringify({ url: targetUrl }),
+      })
+      clearPendingAuditUrl()
+      navigate(`/app/audits/${data.audit.id}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start audit')
+      setRunningId(null)
+      setHandoffBusy(false)
+    }
+  }
 
   async function onAdd(e: FormEvent) {
     e.preventDefault()
@@ -105,6 +148,10 @@ export function WebsitesPage() {
         )}
       </div>
 
+      {handoffBusy && (
+        <p className="mt-6 text-sm text-teal-bright">Starting audit from your landing URL…</p>
+      )}
+
       <form onSubmit={onAdd} className="mt-8 flex flex-col gap-3 sm:flex-row">
         <input
           type="url"
@@ -120,7 +167,7 @@ export function WebsitesPage() {
         />
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || handoffBusy}
           className="rounded-md bg-teal-bright px-5 py-3 text-sm font-semibold text-ink hover:bg-teal disabled:opacity-60"
         >
           {saving ? 'Adding…' : 'Add website'}

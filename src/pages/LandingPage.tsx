@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState, type CSSProperties, type FormEvent } from 'react'
+import { useAuth } from '../features/auth/AuthContext'
+import { setPendingAuditUrl, websitesStartPath, withAuditUrl } from '../lib/pendingAudit'
 
 const SCORES = [
   { label: 'Overall', value: 72 },
@@ -11,12 +13,20 @@ const SCORES = [
 ]
 
 export function LandingPage() {
+  const { token } = useAuth()
+  const navigate = useNavigate()
   const [url, setUrl] = useState('')
 
   function onAudit(e: FormEvent) {
     e.preventDefault()
-    // MVP: send users to register; audit flow comes next
-    window.location.href = `/register${url ? `?url=${encodeURIComponent(url)}` : ''}`
+    const trimmed = url.trim()
+    if (!trimmed) return
+    setPendingAuditUrl(trimmed)
+    if (token) {
+      navigate(websitesStartPath(trimmed))
+      return
+    }
+    navigate(withAuditUrl('/register', trimmed))
   }
 
   return (
