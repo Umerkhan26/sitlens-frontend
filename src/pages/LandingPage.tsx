@@ -4,6 +4,8 @@ import { useAuth } from '../features/auth/AuthContext'
 import { setPendingAuditUrl, websitesStartPath, withAuditUrl } from '../lib/pendingAudit'
 import { ScoreBar } from '../components/ui/ScoreBar'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
+import { Logo } from '../components/ui/Logo'
+import { DemoVideo } from '../components/ui/DemoVideo'
 
 const SCORES = [
   { label: 'Overall', value: 72 },
@@ -120,20 +122,6 @@ const SAMPLE_PROMPT = `You are working on the marketing site at example.com. Add
 description of 140–160 characters to <head> of the home page that includes
 the primary keyword. Preserve all existing meta tags and layout...`
 
-function LogoMark({ className = '' }: { className?: string }) {
-  return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent)]">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.75" />
-          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.25" opacity="0.55" />
-        </svg>
-      </span>
-      <span className="font-semibold tracking-tight text-[var(--fg)]">SiteLens</span>
-    </span>
-  )
-}
-
 export function LandingPage() {
   const { token } = useAuth()
   const navigate = useNavigate()
@@ -164,11 +152,11 @@ export function LandingPage() {
 
   return (
     <div className="page-bg min-h-screen text-[var(--fg)]">
-      {/* Nav — PromptAudit structure */}
-      <header className="sticky top-0 z-40 px-4 pt-4">
-        <div className="nav-bar mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-2.5 sm:px-5">
+      {/* Nav — flush to top, no extra padding above */}
+      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <a href="#top" className="shrink-0">
-            <LogoMark />
+            <Logo />
           </a>
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 text-sm text-[var(--fg-muted)] md:flex">
             <a href="#features" className="hover:text-[var(--fg)]">
@@ -193,27 +181,36 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section id="top" className="relative px-5 pb-6 pt-16 sm:pt-20">
+      {/* Hero — grid boxes only here */}
+      <section id="top" className="grid-zone relative px-5 pb-8 pt-10 sm:pt-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs text-[var(--fg-muted)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--ok)] shadow-[0_0_8px_var(--ok)]" />
             Free during beta · 5 audits/week
           </p>
-          <h1 className="animate-fade-up-delay mt-7 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="animate-fade-up-delay mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
             Audit any website.
             <br />
             Fix it with <span className="gradient-text">AI prompts.</span>
           </h1>
-          <p className="animate-fade-up-delay-2 mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[var(--fg-muted)] sm:text-lg">
+          <p className="animate-fade-up-delay-2 mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[var(--fg-muted)] sm:text-lg">
             Instant scores for SEO, GEO, AEO, AI visibility and technical health — plus a
             production-ready prompt for every issue, ready to paste into Claude Code, Cursor, Codex
             CLI, Gemini CLI or Windsurf.
           </p>
 
+          <div className="animate-fade-up-delay-2 mt-8 flex flex-wrap items-center justify-center gap-3">
+            <button type="button" onClick={() => goAudit()} className="btn-primary">
+              Audit your site <span aria-hidden>→</span>
+            </button>
+            <a href="#demo" className="btn-ghost">
+              See how it works
+            </a>
+          </div>
+
           <form
             onSubmit={onAudit}
-            className="animate-fade-up-delay-2 mx-auto mt-9 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-center"
+            className="animate-fade-up-delay-3 mx-auto mt-5 flex max-w-md flex-col gap-2 sm:flex-row sm:items-center"
           >
             <label className="sr-only" htmlFor="audit-url">
               Website URL
@@ -224,22 +221,16 @@ export function LandingPage() {
               placeholder="https://your-site.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="min-w-0 flex-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-5 py-3 font-mono text-sm text-[var(--fg)] outline-none placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)]"
+              className="min-w-0 flex-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 font-mono text-sm text-[var(--fg)] outline-none placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)]"
             />
-            <button type="submit" className="btn-primary whitespace-nowrap">
-              Audit your site <span aria-hidden>→</span>
+            <button type="submit" className="btn-primary !py-2.5 whitespace-nowrap">
+              Go
             </button>
           </form>
-          <div className="animate-fade-up-delay-3 mt-4">
-            <a href="#how" className="btn-ghost !py-2.5 text-sm">
-              See how it works
-            </a>
-          </div>
         </div>
 
-        {/* Product frame — matches PromptAudit sample report */}
-        <div className="animate-fade-up-delay-3 animate-float relative z-10 mx-auto mt-14 max-w-4xl sm:mt-16">
-          <div className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-[var(--accent)]/10 blur-3xl" />
+        <div className="animate-fade-up-delay-3 relative z-10 mx-auto mt-12 max-w-4xl">
+          <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-[var(--accent)]/8 blur-3xl" />
           <div className="product-frame relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
               <div className="flex items-center gap-3">
@@ -275,23 +266,6 @@ export function LandingPage() {
                     onClick={() => void copySample()}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)] hover:border-[var(--accent)] hover:text-[var(--fg)]"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <rect
-                        x="8"
-                        y="8"
-                        width="12"
-                        height="12"
-                        rx="2"
-                        stroke="currentColor"
-                        strokeWidth="1.75"
-                      />
-                      <path
-                        d="M4 16V6a2 2 0 0 1 2-2h10"
-                        stroke="currentColor"
-                        strokeWidth="1.75"
-                        strokeLinecap="round"
-                      />
-                    </svg>
                     {copied ? 'Copied' : 'Copy prompt'}
                   </button>
                 </div>
@@ -352,14 +326,15 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Demo / in action */}
-      <section className="px-5 py-24">
-        <div className="mx-auto max-w-3xl text-center">
+      {/* Demo video */}
+      <section id="demo" className="relative overflow-hidden px-5 py-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,var(--hero-glow),transparent_70%)]" />
+        <div className="relative mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-medium text-[var(--accent)]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M8 5v14l11-7L8 5z" />
             </svg>
-            Live product
+            2-minute demo
           </span>
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             See SiteLens in action
@@ -368,6 +343,9 @@ export function LandingPage() {
             Watch how a single URL turns into a complete SEO, GEO, and AEO report with copy-paste AI
             fix prompts.
           </p>
+        </div>
+        <div className="relative mx-auto mt-10 max-w-2xl">
+          <DemoVideo />
         </div>
         <div className="mx-auto mt-10 max-w-4xl">
           <div className="cta-band overflow-hidden p-8 text-center sm:p-12">
@@ -433,7 +411,7 @@ export function LandingPage() {
 
       <footer className="border-t border-[var(--border)] px-5 py-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-sm text-[var(--fg-muted)]">
-          <LogoMark />
+          <Logo />
           <span>© 2026 SiteLens. Built for indie hackers, founders, and agencies.</span>
         </div>
       </footer>

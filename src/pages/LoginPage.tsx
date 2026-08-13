@@ -1,13 +1,14 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
+import { Logo } from '../components/ui/Logo'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 import {
   getPendingAuditUrl,
   setPendingAuditUrl,
   websitesStartPath,
   withAuditUrl,
 } from '../lib/pendingAudit'
-import { ThemeToggle } from '../components/ui/ThemeToggle'
 
 function useAuditHandoffUrl() {
   const [params] = useSearchParams()
@@ -61,24 +62,24 @@ export function LoginPage() {
           : 'Sign in to run audits and view your reports.'
       }
     >
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-3">
         {error && (
-          <p className="rounded-xl bg-[var(--danger)]/10 px-3 py-2.5 text-sm text-[var(--danger)]">
+          <p className="rounded-lg bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
             {error}
           </p>
         )}
         <Field label="Email" type="email" value={email} onChange={setEmail} />
         <Field label="Password" type="password" value={password} onChange={setPassword} />
-        <div className="-mt-1 text-right">
+        <div className="-mt-0.5 text-right">
           <Link to="/forgot-password" className="text-xs font-medium text-[var(--accent)] hover:underline">
             Forgot password?
           </Link>
         </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-xl disabled:opacity-60">
+        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-lg !py-2.5 disabled:opacity-60">
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p className="mt-8 text-center text-sm text-[var(--fg-muted)]">
+      <p className="mt-6 text-center text-sm text-[var(--fg-muted)]">
         New here?{' '}
         <Link
           to={withAuditUrl('/register', auditUrl || null)}
@@ -124,9 +125,9 @@ export function RegisterPage() {
           : '5 audits every week during beta. No credit card.'
       }
     >
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-3">
         {error && (
-          <p className="rounded-xl bg-[var(--danger)]/10 px-3 py-2.5 text-sm text-[var(--danger)]">
+          <p className="rounded-lg bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
             {error}
           </p>
         )}
@@ -139,11 +140,11 @@ export function RegisterPage() {
           onChange={setPassword}
           minLength={8}
         />
-        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-xl disabled:opacity-60">
+        <button type="submit" disabled={loading} className="btn-primary w-full !rounded-lg !py-2.5 disabled:opacity-60">
           {loading ? 'Creating account…' : auditUrl ? 'Create account & audit' : 'Start free'}
         </button>
       </form>
-      <p className="mt-8 text-center text-sm text-[var(--fg-muted)]">
+      <p className="mt-6 text-center text-sm text-[var(--fg-muted)]">
         Already have an account?{' '}
         <Link
           to={withAuditUrl('/login', auditUrl || null)}
@@ -166,30 +167,22 @@ export function AuthShell({
   children: ReactNode
 }) {
   return (
-    <div className="page-bg relative flex min-h-screen items-center justify-center px-5 py-16">
-      <div className="absolute right-5 top-5">
+    <div className="relative flex min-h-[100svh] items-center justify-center bg-[var(--bg)] px-4 py-6">
+      <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-[22rem]">
         <Link
           to="/"
-          className="mb-8 inline-flex text-sm text-[var(--fg-muted)] transition hover:text-[var(--accent)]"
+          className="mb-4 inline-flex text-xs text-[var(--fg-muted)] transition hover:text-[var(--accent)]"
         >
           ← Back home
         </Link>
-        <div className="product-frame p-7 sm:p-9">
-          <p className="inline-flex items-center gap-2 font-semibold tracking-tight text-[var(--fg)]">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent)]">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.75" />
-                <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.25" opacity="0.55" />
-              </svg>
-            </span>
-            SiteLens
-          </p>
-          <h1 className="mt-6 text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--fg-muted)]">{subtitle}</p>
-          <div className="mt-8">{children}</div>
+        <div className="product-frame p-5 sm:p-6">
+          <Logo size="sm" />
+          <h1 className="mt-4 text-xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-1 text-xs leading-relaxed text-[var(--fg-muted)]">{subtitle}</p>
+          <div className="mt-5">{children}</div>
         </div>
       </div>
     </div>
@@ -211,14 +204,14 @@ export function Field({
 }) {
   return (
     <label className="block text-sm">
-      <span className="font-medium text-[var(--fg-muted)]">{label}</span>
+      <span className="text-xs font-medium text-[var(--fg-muted)]">{label}</span>
       <input
         type={type}
         required
         minLength={minLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1.5 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg)] px-3.5 py-3 text-[var(--fg)] outline-none transition focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)]"
+        className="mt-1 w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--fg)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-soft)]"
       />
     </label>
   )

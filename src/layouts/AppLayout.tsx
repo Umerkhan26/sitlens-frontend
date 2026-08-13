@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 import { useApi, type Usage } from '../services/api'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
+import { Logo } from '../components/ui/Logo'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-1.5 text-sm font-medium transition ${
@@ -26,17 +27,11 @@ export function AppLayout() {
 
   return (
     <div className="page-bg-soft min-h-screen text-[var(--fg)]">
-      <header className="sticky top-0 z-20 px-4 pt-4">
-        <div className="nav-bar mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl px-4 py-2.5 sm:px-5">
+      <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
           <div className="flex items-center gap-5">
-            <Link to="/app" className="inline-flex items-center gap-2 font-semibold tracking-tight">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent)]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.75" />
-                  <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.25" opacity="0.55" />
-                </svg>
-              </span>
-              SiteLens
+            <Link to="/app">
+              <Logo />
             </Link>
             <nav className="hidden items-center gap-1 sm:flex">
               <NavLink to="/app" end className={navClass}>
@@ -80,8 +75,8 @@ export function AppLayout() {
           </div>
         </div>
         {menuOpen && (
-          <div className="nav-bar mx-auto mt-2 max-w-6xl rounded-2xl px-4 py-3 sm:hidden">
-            <nav className="flex flex-col gap-1">
+          <div className="border-t border-[var(--border)] px-5 py-3 sm:hidden">
+            <nav className="mx-auto flex max-w-6xl flex-col gap-1">
               <NavLink to="/app" end className={navClass} onClick={() => setMenuOpen(false)}>
                 Dashboard
               </NavLink>

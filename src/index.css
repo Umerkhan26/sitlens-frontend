@@ -131,26 +131,69 @@ html[data-theme="light"] {
 
 .page-bg {
   background-color: var(--bg);
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, var(--hero-glow), transparent 55%),
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    64px 64px,
-    64px 64px;
+  background-image: radial-gradient(
+    ellipse 70% 40% at 50% -5%,
+    var(--hero-glow),
+    transparent 55%
+  );
 }
 
 .page-bg-soft {
   background-color: var(--bg);
+}
+
+/* Grid boxes ONLY in hero + CTA bands (masked fade at edges) */
+.grid-zone {
+  position: relative;
+  isolation: isolate;
+}
+
+.grid-zone::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   background-image:
-    radial-gradient(ellipse 60% 40% at 80% 0%, var(--hero-glow), transparent 50%),
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    56px 56px,
-    56px 56px;
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 65% at 50% 40%, #000 20%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 40%, #000 20%, transparent 72%);
+  opacity: 0.9;
+}
+
+.grid-zone > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 1.25rem;
+}
+
+.cta-band::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 15%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 15%, transparent 70%);
+}
+
+.cta-band > * {
+  position: relative;
+  z-index: 1;
 }
 
 .gradient-text {
@@ -266,17 +309,3 @@ html[data-theme="light"] .panel-elevated {
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
-.cta-band {
-  border: 1px solid var(--border);
-  background:
-    radial-gradient(ellipse 70% 80% at 50% 50%, var(--hero-glow), transparent 65%),
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-    var(--surface);
-  background-size:
-    100% 100%,
-    48px 48px,
-    48px 48px,
-    100% 100%;
-  border-radius: 1.25rem;
-}
