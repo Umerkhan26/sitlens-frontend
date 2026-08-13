@@ -3,9 +3,11 @@ import { useAuth } from '../features/auth/AuthContext'
 
 export class ApiError extends Error {
   status: number
-  constructor(message: string, status: number) {
+  data: unknown
+  constructor(message: string, status: number, data?: unknown) {
     super(message)
     this.status = status
+    this.data = data
   }
 }
 
@@ -26,10 +28,14 @@ export function useApi() {
       const data = await res.json().catch(() => ({}))
       if (res.status === 401) {
         logout()
-        throw new ApiError((data as { message?: string }).message || 'Unauthorized', 401)
+        throw new ApiError((data as { message?: string }).message || 'Unauthorized', 401, data)
       }
       if (!res.ok) {
-        throw new ApiError((data as { message?: string }).message || 'Request failed', res.status)
+        throw new ApiError(
+          (data as { message?: string }).message || 'Request failed',
+          res.status,
+          data,
+        )
       }
       return data as T
     },
@@ -53,6 +59,8 @@ export type Website = {
       technical?: number
       geo?: number
       aeo?: number
+      aiVisibility?: number
+      accessibility?: number
     }
     createdAt: string
   } | null
@@ -67,6 +75,8 @@ export type Audit = {
     technical?: number
     geo?: number
     aeo?: number
+    aiVisibility?: number
+    accessibility?: number
   }
   issueCount?: { critical: number; high: number; medium: number; low: number }
   errorMessage?: string
@@ -95,10 +105,17 @@ export type Audit = {
   } | null
 }
 
+export type Usage = {
+  used: number
+  limit: number
+  remaining: number
+  resetsAt?: string
+}
+
 export type Issue = {
   id: string
   code: string
-  category: 'seo' | 'technical' | 'geo' | 'aeo'
+  category: 'seo' | 'technical' | 'geo' | 'aeo' | 'aiVisibility' | 'accessibility'
   severity: 'critical' | 'high' | 'medium' | 'low'
   title: string
   whyItMatters: string

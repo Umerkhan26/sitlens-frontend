@@ -1,19 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
-import { useApi, type Website } from '../services/api'
+import { useApi, type Usage, type Website } from '../services/api'
 
 export function DashboardPage() {
   const { user } = useAuth()
   const { api } = useApi()
   const [websites, setWebsites] = useState<Website[]>([])
+  const [usage, setUsage] = useState<Usage | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await api<{ websites: Website[] }>('/websites')
-        setWebsites(data.websites)
+        const [sitesRes, usageRes] = await Promise.all([
+          api<{ websites: Website[] }>('/websites'),
+          api<{ usage: Usage }>('/auth/usage'),
+        ])
+        setWebsites(sitesRes.websites)
+        setUsage(usageRes.usage)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load')
       }
@@ -38,11 +43,15 @@ export function DashboardPage() {
 
       {error && <p className="mt-4 text-sm text-red-300">{error}</p>}
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Websites', value: String(websites.length) },
           { label: 'Scored sites', value: String(scored.length) },
           { label: 'Avg score', value: avg != null ? String(avg) : '—' },
+          {
+            label: 'Credits left',
+            value: usage ? `${usage.remaining}/${usage.limit}` : '—',
+          },
         ].map((s) => (
           <div key={s.label} className="rounded-lg border border-white/10 bg-ink-soft px-4 py-5">
             <p className="text-xs uppercase tracking-wide text-white/45">{s.label}</p>
