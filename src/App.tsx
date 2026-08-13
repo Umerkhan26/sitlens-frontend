@@ -7,6 +7,7 @@ import { WebsitesPage } from './pages/WebsitesPage'
 import { WebsiteHistoryPage } from './pages/WebsiteHistoryPage'
 import { AuditProgressPage } from './pages/AuditProgressPage'
 import { AuditReportPage } from './pages/AuditReportPage'
+import { AuditComparePage } from './pages/AuditComparePage'
 import { AppLayout } from './layouts/AppLayout'
 import { AuthProvider, useAuth } from './features/auth/AuthContext'
 import type { ReactNode } from 'react'
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="websites/:id" element={<WebsiteHistoryPage />} />
             <Route path="audits/:id" element={<AuditProgressPage />} />
             <Route path="audits/:id/report" element={<AuditReportPage />} />
+            <Route path="audits/:id/compare" element={<AuditComparePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

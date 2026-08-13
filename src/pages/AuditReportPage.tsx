@@ -93,9 +93,19 @@ export function AuditReportPage() {
             {audit.crawlSummary?.finalUrl ? ` · ${audit.crawlSummary.finalUrl}` : ''}
           </p>
         </div>
-        <p className="text-xs text-white/40">
-          {new Date(audit.createdAt).toLocaleString()}
-        </p>
+        <div className="flex flex-col items-end gap-2">
+          <p className="text-xs text-white/40">
+            {new Date(audit.createdAt).toLocaleString()}
+          </p>
+          {audit.website?.id && (
+            <Link
+              to={`/app/audits/${audit.id}/compare`}
+              className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-white/70 hover:border-teal-bright/40"
+            >
+              Compare with previous
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
