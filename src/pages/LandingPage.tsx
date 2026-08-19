@@ -126,7 +126,7 @@ export function LandingPage() {
   const { token } = useAuth()
   const navigate = useNavigate()
   const [url, setUrl] = useState('')
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [copied, setCopied] = useState(false)
 
   function goAudit(target?: string) {
@@ -152,65 +152,66 @@ export function LandingPage() {
 
   return (
     <div className="page-bg min-h-screen text-[var(--fg)]">
-      {/* Nav — flush to top, no extra padding above */}
       <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <a href="#top" className="shrink-0">
             <Logo />
           </a>
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 text-sm text-[var(--fg-muted)] md:flex">
-            <a href="#features" className="hover:text-[var(--fg)]">
+            <a href="#features" className="transition-colors hover:text-[var(--fg)]">
               Features
             </a>
-            <a href="#how" className="hover:text-[var(--fg)]">
+            <a href="#how" className="transition-colors hover:text-[var(--fg)]">
               How it works
             </a>
-            <a href="#faq" className="hover:text-[var(--fg)]">
+            <a href="#demo" className="transition-colors hover:text-[var(--fg)]">
+              Demo
+            </a>
+            <a href="#faq" className="transition-colors hover:text-[var(--fg)]">
               FAQ
             </a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
-            <Link to="/login" className="hidden text-sm text-[var(--fg-muted)] hover:text-[var(--fg)] sm:inline">
-              Sign in
-            </Link>
-            <Link to="/register" className="btn-primary !py-2 !px-3.5 text-xs sm:text-sm">
-              Start free <span aria-hidden>→</span>
-            </Link>
+            {token ? (
+              <Link to="/app" className="btn-primary !px-3.5 !py-2 text-xs sm:text-sm">
+                Open app <span aria-hidden>→</span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="hidden text-sm text-[var(--fg-muted)] transition-colors hover:text-[var(--fg)] sm:inline"
+                >
+                  Sign in
+                </Link>
+                <Link to="/register" className="btn-primary !px-3.5 !py-2 text-xs sm:text-sm">
+                  Start free <span aria-hidden>→</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Hero — grid boxes only here */}
-      <section id="top" className="grid-zone relative px-5 pb-8 pt-10 sm:pt-12">
+      {/* Hero */}
+      <section id="top" className="grid-zone relative px-5 pb-10 pt-12 sm:pt-16">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs text-[var(--fg-muted)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--ok)] shadow-[0_0_8px_var(--ok)]" />
-            Free during beta · 5 audits/week
+          <p className="animate-fade-up font-display text-4xl font-semibold tracking-tight text-[var(--fg)] sm:text-5xl md:text-6xl">
+            Site<span className="text-[var(--accent)]">Lens</span>
           </p>
-          <h1 className="animate-fade-up-delay mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
-            Audit any website.
-            <br />
-            Fix it with <span className="gradient-text">AI prompts.</span>
+          <h1 className="animate-fade-up-delay mt-4 text-2xl font-medium leading-snug tracking-tight text-[var(--fg-muted)] sm:text-3xl md:text-[2rem]">
+            Audit any website. Fix it with{' '}
+            <span className="gradient-text font-semibold">AI prompts.</span>
           </h1>
-          <p className="animate-fade-up-delay-2 mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[var(--fg-muted)] sm:text-lg">
-            Instant scores for SEO, GEO, AEO, AI visibility and technical health — plus a
-            production-ready prompt for every issue, ready to paste into Claude Code, Cursor, Codex
-            CLI, Gemini CLI or Windsurf.
+          <p className="animate-fade-up-delay-2 mx-auto mt-5 max-w-xl text-[15px] leading-relaxed text-[var(--fg-muted)] sm:text-base">
+            Scores for SEO, GEO, AEO, AI visibility and technical health — plus a copy-paste fix
+            prompt for every issue.
           </p>
-
-          <div className="animate-fade-up-delay-2 mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button type="button" onClick={() => goAudit()} className="btn-primary">
-              Audit your site <span aria-hidden>→</span>
-            </button>
-            <a href="#demo" className="btn-ghost">
-              See how it works
-            </a>
-          </div>
 
           <form
             onSubmit={onAudit}
-            className="animate-fade-up-delay-3 mx-auto mt-5 flex max-w-md flex-col gap-2 sm:flex-row sm:items-center"
+            className="animate-fade-up-delay-2 mx-auto mt-8 flex max-w-lg flex-col gap-2.5 sm:flex-row sm:items-stretch"
           >
             <label className="sr-only" htmlFor="audit-url">
               Website URL
@@ -221,33 +222,42 @@ export function LandingPage() {
               placeholder="https://your-site.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="min-w-0 flex-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 font-mono text-sm text-[var(--fg)] outline-none placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)]"
+              className="min-w-0 flex-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-5 py-3 font-mono text-sm text-[var(--fg)] outline-none placeholder:text-[var(--fg-subtle)] focus:border-[var(--accent)]"
             />
-            <button type="submit" className="btn-primary !py-2.5 whitespace-nowrap">
-              Go
+            <button type="submit" className="btn-primary whitespace-nowrap !px-6">
+              Audit free <span aria-hidden>→</span>
             </button>
           </form>
+
+          <p className="animate-fade-up-delay-3 mt-4 text-xs text-[var(--fg-subtle)]">
+            Free beta · 5 audits/week ·{' '}
+            <a href="#demo" className="text-[var(--fg-muted)] underline-offset-2 hover:text-[var(--accent)] hover:underline">
+              Watch the demo
+            </a>
+          </p>
         </div>
 
-        <div className="animate-fade-up-delay-3 relative z-10 mx-auto mt-12 max-w-4xl">
+        <div className="animate-fade-up-delay-3 relative z-10 mx-auto mt-14 max-w-4xl">
           <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-[var(--accent)]/8 blur-3xl" />
           <div className="product-frame relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5" aria-hidden>
                   <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
                 </div>
                 <p className="font-mono text-xs text-[var(--fg-subtle)]">audit://example.com</p>
               </div>
-              <p className="text-xs text-[var(--fg-muted)]">Complete · 24s</p>
+              <p className="text-xs text-[var(--ok)]">Complete · 24s</p>
             </div>
 
             <div className="p-4 sm:p-5">
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
-                {SCORES.map((s) => (
-                  <ScoreBar key={s.label} label={s.label} value={s.value} />
+                {SCORES.map((s, i) => (
+                  <div key={s.label} style={{ animationDelay: `${0.35 + i * 0.06}s` }} className="animate-fade-up">
+                    <ScoreBar label={s.label} value={s.value} />
+                  </div>
                 ))}
               </div>
 
@@ -264,7 +274,7 @@ export function LandingPage() {
                   <button
                     type="button"
                     onClick={() => void copySample()}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)] hover:border-[var(--accent)] hover:text-[var(--fg)]"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--fg)]"
                   >
                     {copied ? 'Copied' : 'Copy prompt'}
                   </button>
@@ -278,21 +288,21 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="px-5 py-24">
+      {/* Features — borderless blocks */}
+      <section id="features" className="px-5 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
             Features
           </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="mt-3 max-w-xl text-3xl font-semibold tracking-tight sm:text-4xl">
             Ship AI-native web quality
           </h2>
-          <p className="mt-3 max-w-2xl text-[var(--fg-muted)]">
-            Everything you need to rank in Google, appear in AI answers, and pass the technical bar.
+          <p className="mt-3 max-w-xl text-[var(--fg-muted)]">
+            Rank in Google, show up in AI answers, and clear the technical bar — in one pass.
           </p>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-x-10 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <div key={f.title} className="feature-card p-6">
+              <div key={f.title} className="feature-block">
                 <span className="icon-box">{f.icon}</span>
                 <h3 className="mt-4 text-lg font-semibold tracking-tight">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--fg-muted)]">{f.body}</p>
@@ -303,22 +313,24 @@ export function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section id="how" className="border-y border-[var(--border)] bg-[var(--bg-elevated)] px-5 py-24">
+      <section id="how" className="border-y border-[var(--border)] bg-[var(--bg-elevated)] px-5 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
             How it works
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            From URL to fixed website in minutes
+            URL → fixed site in minutes
           </h2>
-          <p className="mt-3 text-[var(--fg-muted)]">
-            No configuration. No integrations. Just paste a URL and start shipping fixes.
+          <p className="mt-3 max-w-lg text-[var(--fg-muted)]">
+            No setup. No integrations. Paste a URL and start shipping fixes.
           </p>
-          <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="step-rail mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {STEPS.map(([n, t, d]) => (
-              <li key={n} className="feature-card p-6">
-                <span className="font-mono text-sm font-medium text-[var(--accent)]">{n}</span>
-                <h3 className="mt-3 font-semibold tracking-tight">{t}</h3>
+              <li key={n} className="relative">
+                <span className="relative z-[1] inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--accent)]/40 bg-[var(--bg)] font-mono text-xs font-medium text-[var(--accent)]">
+                  {n}
+                </span>
+                <h3 className="mt-4 font-semibold tracking-tight">{t}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--fg-muted)]">{d}</p>
               </li>
             ))}
@@ -326,45 +338,30 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Demo video */}
-      <section id="demo" className="relative overflow-hidden px-5 py-24">
+      {/* Demo */}
+      <section id="demo" className="relative overflow-hidden px-5 py-20 sm:py-24">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,var(--hero-glow),transparent_70%)]" />
         <div className="relative mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-medium text-[var(--accent)]">
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-[var(--accent)]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M8 5v14l11-7L8 5z" />
             </svg>
             2-minute demo
           </span>
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
             See SiteLens in action
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-[var(--fg-muted)]">
-            Watch how a single URL turns into a complete SEO, GEO, and AEO report with copy-paste AI
-            fix prompts.
+          <p className="mx-auto mt-3 max-w-md text-[var(--fg-muted)]">
+            One URL → full report + copy-paste AI fix prompts.
           </p>
         </div>
         <div className="relative mx-auto mt-10 max-w-2xl">
           <DemoVideo />
         </div>
-        <div className="mx-auto mt-10 max-w-4xl">
-          <div className="cta-band overflow-hidden p-8 text-center sm:p-12">
-            <h3 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              See a full audit report
-            </h3>
-            <p className="mx-auto mt-3 max-w-lg text-sm text-[var(--fg-muted)] sm:text-base">
-              Sign up free and run your first audit. Every issue includes a copy-paste prompt for
-              your AI coding agent.
-            </p>
-            <button type="button" onClick={() => goAudit()} className="btn-primary mt-8">
-              Run a free audit <span aria-hidden>→</span>
-            </button>
-          </div>
-        </div>
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="px-5 pb-24">
+      <section id="faq" className="px-5 pb-20 sm:pb-24">
         <div className="mx-auto max-w-2xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
             FAQ
@@ -382,7 +379,11 @@ export function LandingPage() {
                     aria-expanded={open}
                   >
                     <span className="font-medium tracking-tight">{q}</span>
-                    <span className="text-lg text-[var(--fg-muted)]">{open ? '−' : '+'}</span>
+                    <span
+                      className={`font-mono text-lg text-[var(--fg-muted)] transition-transform ${open ? 'rotate-45' : ''}`}
+                    >
+                      +
+                    </span>
                   </button>
                   {open && (
                     <p className="pb-5 text-sm leading-relaxed text-[var(--fg-muted)]">{a}</p>
@@ -396,23 +397,45 @@ export function LandingPage() {
 
       {/* Final CTA */}
       <section className="px-5 pb-20">
-        <div className="cta-band mx-auto max-w-5xl px-6 py-16 text-center sm:px-10">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+        <div className="cta-band mx-auto max-w-4xl px-6 py-14 text-center sm:px-10 sm:py-16">
+          <p className="font-display text-2xl font-semibold tracking-tight text-[var(--accent)] sm:text-3xl">
+            SiteLens
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
             Free during beta. No credit card.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-[var(--fg-muted)]">
-            Get 5 full audits every week — with AI prompts for every issue.
+            5 full audits every week — with AI prompts for every issue.
           </p>
-          <Link to="/register" className="btn-primary mt-8 inline-flex">
-            Start free <span aria-hidden>✓</span>
-          </Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link to="/register" className="btn-primary inline-flex">
+              Start free <span aria-hidden>→</span>
+            </Link>
+            <a href="#demo" className="btn-ghost">
+              Watch demo
+            </a>
+          </div>
         </div>
       </section>
 
       <footer className="border-t border-[var(--border)] px-5 py-8">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-sm text-[var(--fg-muted)]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Logo />
-          <span>© 2026 SiteLens. Built for indie hackers, founders, and agencies.</span>
+          <div className="flex flex-wrap gap-5 text-sm text-[var(--fg-muted)]">
+            <a href="#features" className="hover:text-[var(--fg)]">
+              Features
+            </a>
+            <a href="#demo" className="hover:text-[var(--fg)]">
+              Demo
+            </a>
+            <a href="#faq" className="hover:text-[var(--fg)]">
+              FAQ
+            </a>
+            <Link to="/login" className="hover:text-[var(--fg)]">
+              Sign in
+            </Link>
+          </div>
+          <span className="text-xs text-[var(--fg-subtle)]">© 2026 SiteLens</span>
         </div>
       </footer>
     </div>

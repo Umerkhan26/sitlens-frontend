@@ -19,7 +19,7 @@ export function ScoreBar({
       </p>
       <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--track)]">
         <div
-          className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-700 ease-out"
+          className="score-fill h-full rounded-full bg-[var(--accent)]"
           style={{ width: `${pct}%` }}
         />
       </div>

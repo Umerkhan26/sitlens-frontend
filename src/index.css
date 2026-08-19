@@ -20,7 +20,7 @@
   --color-ok: #22c55e;
 }
 
-/* —— Theme tokens (PromptAudit-grade dark/light) —— */
+/* —— Theme tokens —— */
 :root,
 html[data-theme="dark"] {
   --bg: #070b12;
@@ -86,6 +86,13 @@ html[data-theme="light"] {
   ::selection {
     background: color-mix(in srgb, var(--accent) 40%, transparent);
   }
+
+  h1,
+  h2,
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+  }
 }
 
 @keyframes fade-up {
@@ -106,6 +113,15 @@ html[data-theme="light"] {
   }
   50% {
     transform: translateY(-6px);
+  }
+}
+
+@keyframes bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
@@ -142,7 +158,6 @@ html[data-theme="light"] {
   background-color: var(--bg);
 }
 
-/* Grid boxes ONLY in hero + CTA bands (masked fade at edges) */
 .grid-zone {
   position: relative;
   isolation: isolate;
@@ -173,8 +188,10 @@ html[data-theme="light"] {
   isolation: isolate;
   overflow: hidden;
   border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 1.25rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-soft), transparent 55%),
+    var(--surface);
+  border-radius: 1.5rem;
 }
 
 .cta-band::before {
@@ -197,7 +214,7 @@ html[data-theme="light"] {
 }
 
 .gradient-text {
-  background: linear-gradient(180deg, var(--fg) 20%, var(--accent) 140%);
+  background: linear-gradient(180deg, var(--fg) 10%, var(--accent) 120%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -247,12 +264,6 @@ html[data-theme="light"] {
   background: var(--accent-soft);
 }
 
-.nav-bar {
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-elevated) 72%, transparent);
-  backdrop-filter: blur(16px) saturate(1.2);
-}
-
 .product-frame {
   border: 1px solid var(--border);
   background: var(--surface);
@@ -279,6 +290,17 @@ html[data-theme="light"] .product-frame {
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
   transform: translateY(-2px);
   box-shadow: 0 16px 40px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* Borderless feature blocks — less “dashboard card” feel */
+.feature-block {
+  padding: 0.25rem 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+
+.feature-block:hover {
+  border-bottom-color: color-mix(in srgb, var(--accent) 45%, var(--border));
 }
 
 .icon-box {
@@ -309,3 +331,28 @@ html[data-theme="light"] .panel-elevated {
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
+.score-fill {
+  transform-origin: left center;
+  animation: bar-fill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.step-rail {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .step-rail::before {
+    content: "";
+    position: absolute;
+    top: 1.15rem;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--accent) 45%, var(--border)),
+      transparent
+    );
+  }
+}

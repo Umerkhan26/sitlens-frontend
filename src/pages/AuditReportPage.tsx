@@ -4,6 +4,13 @@ import { useApi, type Audit, type Issue } from '../services/api'
 import { ScoreBar } from '../components/ui/ScoreBar'
 import { FilterChip } from '../components/ui/FilterChip'
 import { PromptBlock } from '../components/ui/PromptBlock'
+import {
+  buildFixQueueClipboard,
+  categoryLabel,
+  downloadMarkdownReport,
+  printPdfReport,
+  sortIssuesBySeverity,
+} from '../lib/reportExport'
 
 const SEVERITY_STYLE: Record<string, string> = {
   critical: 'bg-[var(--danger)]/15 text-[var(--danger)]',
@@ -12,7 +19,7 @@ const SEVERITY_STYLE: Record<string, string> = {
   low: 'bg-[var(--surface-3)] text-[var(--fg-muted)]',
 }
 
-function categoryLabel(c: string) {
+function chipCategoryLabel(c: string) {
   if (c === 'aiVisibility') return 'AI Vis'
   if (c === 'accessibility') return 'A11y'
   if (c === 'performance') return 'Perf'
@@ -29,6 +36,7 @@ export function AuditReportPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
   const [error, setError] = useState('')
+  const [exportNote, setExportNote] = useState('')
 
   useEffect(() => {
     if (!id) return
@@ -40,7 +48,8 @@ export function AuditReportPage() {
         ])
         setAudit(auditRes.audit)
         setIssues(issuesRes.issues)
-        if (issuesRes.issues[0]) setExpanded(issuesRes.issues[0].id)
+        const first = sortIssuesBySeverity(issuesRes.issues)[0]
+        if (first) setExpanded(first.id)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load report')
       }
@@ -48,25 +57,37 @@ export function AuditReportPage() {
     void load()
   }, [id, api])
 
+  const queued = useMemo(() => sortIssuesBySeverity(issues), [issues])
+
   const filtered = useMemo(() => {
-    return issues.filter((i) => {
+    return queued.filter((i) => {
       if (filter !== 'all' && i.severity !== filter) return false
       if (categoryFilter !== 'all' && i.category !== categoryFilter) return false
       return true
     })
-  }, [issues, filter, categoryFilter])
+  }, [queued, filter, categoryFilter])
 
   async function copyAllPrompts() {
-    const blocks = filtered
-      .filter((i) => i.fixPrompt)
-      .map(
-        (i, idx) =>
-          `## ${idx + 1}. [${i.severity.toUpperCase()} / ${i.category}] ${i.title}\n\n${i.fixPrompt}`,
-      )
-    if (blocks.length === 0) return
-    await navigator.clipboard.writeText(blocks.join('\n\n---\n\n'))
+    if (!audit) return
+    const text = buildFixQueueClipboard(audit, queued)
+    if (!text) return
+    await navigator.clipboard.writeText(text)
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
+  }
+
+  function downloadMd() {
+    if (!audit) return
+    downloadMarkdownReport(audit, queued)
+    setExportNote('Markdown downloaded')
+    setTimeout(() => setExportNote(''), 1600)
+  }
+
+  function downloadPdf() {
+    if (!audit) return
+    printPdfReport(audit, queued)
+    setExportNote('Print dialog — choose Save as PDF')
+    setTimeout(() => setExportNote(''), 2800)
   }
 
   if (error) return <p className="text-sm text-[var(--danger)]">{error}</p>
@@ -119,10 +140,20 @@ export function AuditReportPage() {
           <div className="flex flex-wrap justify-end gap-2">
             <button
               type="button"
+              onClick={downloadMd}
+              className="btn-ghost !rounded-xl !py-2 text-xs"
+            >
+              Download Markdown
+            </button>
+            <button type="button" onClick={downloadPdf} className="btn-ghost !rounded-xl !py-2 text-xs">
+              Download PDF
+            </button>
+            <button
+              type="button"
               onClick={() => void copyAllPrompts()}
               className="btn-ghost !rounded-xl !py-2 text-xs"
             >
-              {copiedAll ? 'Copied all' : 'Copy all prompts'}
+              {copiedAll ? 'Copied queue' : 'Copy all prompts'}
             </button>
             {audit.website?.id && (
               <Link
@@ -133,6 +164,7 @@ export function AuditReportPage() {
               </Link>
             )}
           </div>
+          {exportNote && <p className="text-[11px] text-[var(--accent)]">{exportNote}</p>}
         </div>
       </div>
 
@@ -162,6 +194,55 @@ export function AuditReportPage() {
         )}
       </div>
 
+      {queued.length > 0 && (
+        <div className="feature-card mt-4 overflow-hidden">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border)] px-4 py-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                Fix queue
+              </p>
+              <p className="mt-1 text-sm text-[var(--fg-muted)]">
+                Critical first. Copy the whole queue, or pick one item.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void copyAllPrompts()}
+              className="btn-primary !rounded-xl !py-2 text-xs"
+            >
+              {copiedAll ? 'Copied queue' : `Copy ${queued.filter((i) => i.fixPrompt).length} prompts`}
+            </button>
+          </div>
+          <ol className="divide-y divide-[var(--border)]">
+            {queued.map((issue, idx) => (
+              <li key={issue.id}>
+                <button
+                  type="button"
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-[var(--surface-2)]"
+                  onClick={() => setExpanded(issue.id)}
+                >
+                  <span className="mt-0.5 w-6 shrink-0 font-mono text-xs text-[var(--fg-subtle)]">
+                    {idx + 1}
+                  </span>
+                  <span
+                    className={`mt-0.5 shrink-0 rounded px-2 py-0.5 text-[10px] font-medium capitalize ${SEVERITY_STYLE[issue.severity]}`}
+                  >
+                    {issue.severity}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium tracking-tight">{issue.title}</span>
+                    <span className="mt-0.5 block text-[11px] text-[var(--fg-subtle)]">
+                      {categoryLabel(issue.category)}
+                      {issue.fixPrompt ? '' : ' · no prompt'}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       <div className="mt-8 space-y-3">
         <div className="flex flex-wrap gap-2">
           {(
@@ -181,7 +262,7 @@ export function AuditReportPage() {
               active={categoryFilter === c}
               onClick={() => setCategoryFilter(c)}
             >
-              {c === 'all' ? 'All categories' : categoryLabel(c)}
+              {c === 'all' ? 'All categories' : chipCategoryLabel(c)}
             </FilterChip>
           ))}
         </div>
@@ -202,6 +283,7 @@ export function AuditReportPage() {
         )}
         {filtered.map((issue) => {
           const open = expanded === issue.id
+          const queueNum = queued.findIndex((i) => i.id === issue.id) + 1
           return (
             <div
               key={issue.id}
@@ -215,13 +297,14 @@ export function AuditReportPage() {
                 onClick={() => setExpanded(open ? null : issue.id)}
               >
                 <div>
+                  <span className="mr-2 font-mono text-xs text-[var(--fg-subtle)]">{queueNum}.</span>
                   <span
                     className={`rounded px-2 py-0.5 text-[11px] font-medium capitalize ${SEVERITY_STYLE[issue.severity]}`}
                   >
                     {issue.severity}
                   </span>
                   <span className="ml-2 text-[11px] uppercase tracking-wide text-[var(--fg-subtle)]">
-                    {categoryLabel(issue.category)}
+                    {chipCategoryLabel(issue.category)}
                   </span>
                   <p className="mt-2 font-medium tracking-tight">{issue.title}</p>
                 </div>
